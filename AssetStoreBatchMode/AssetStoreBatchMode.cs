@@ -215,7 +215,11 @@ namespace Thinksquirrel.ASBM
 
         private static void Update()
         {
-            AssetStoreClient.Update();
+            if (CurrentState != State.Error)
+            {
+                AssetStoreClient.Update();
+            }
+
             switch (CurrentState)
             {
                 case State.Login:
@@ -238,10 +242,10 @@ namespace Thinksquirrel.ASBM
                     break;
                 case State.Error:
                 case State.Finished:
-                    Finish();
-                    OnFinished(CurrentState == State.Error);
-                    Debug.Log("FINISHED");
                     EditorApplication.update -= Update;
+                    OnFinished(CurrentState == State.Error);
+                    Finish();
+                    Debug.Log("FINISHED");
                     return;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -414,7 +418,6 @@ namespace Thinksquirrel.ASBM
 
             Debug.LogError("[Asset Store Batch Mode] " + errorMessage);
             CurrentState = State.Error;
-            Finish();
         }
 
         static void OnGetMetadata(string errorMessage)
@@ -424,7 +427,6 @@ namespace Thinksquirrel.ASBM
             if (errorMessage == null) return;
 
             Debug.LogError("[Asset Store Batch Mode] " + errorMessage);
-            Finish();
             CurrentState = State.Error;
         }
 
@@ -435,7 +437,6 @@ namespace Thinksquirrel.ASBM
             if (errorMessage == null) return;
 
             Debug.LogError("[Asset Store Batch Mode] " + errorMessage);
-            Finish();
             CurrentState = State.Error;
         }
 
