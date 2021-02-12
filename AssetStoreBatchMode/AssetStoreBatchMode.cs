@@ -31,7 +31,7 @@ namespace Thinksquirrel.ASBM
 
         private static State currentState;
 
-        public static event Action Finished;
+        public static event Action<bool> Finished;
         
         // Input
         static string s_Username;
@@ -75,6 +75,7 @@ namespace Thinksquirrel.ASBM
         /// </remarks>
         public static void UploadAssetStorePackage()
         {
+            Finished += (error) => EditorApplication.Exit(error ? -1 : 0);
             UploadAssetStorePackage(Environment.GetCommandLineArgs());
         }
 
@@ -238,7 +239,7 @@ namespace Thinksquirrel.ASBM
                 case State.Error:
                 case State.Finished:
                     Finish();
-                    OnFinished();
+                    OnFinished(CurrentState == State.Error);
                     Debug.Log("FINISHED");
                     EditorApplication.update -= Update;
                     return;
@@ -615,10 +616,10 @@ namespace Thinksquirrel.ASBM
             return array;
         }
 
-        private static void OnFinished()
+        private static void OnFinished(bool error)
         {
-            Action handler = Finished;
-            if (handler != null) handler();
+            Action<bool> handler = Finished;
+            if (handler != null) handler(error);
         }
     }
     #endregion
